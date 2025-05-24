@@ -14,7 +14,7 @@ from typing import Any, Dict
 import torch
 
 from ultralytics.engine.model import Model
-from ultralytics.utils import DEFAULT_CFG_DICT
+from ultralytics.utils import DEFAULT_CFG_DICT, LOGGER
 from ultralytics.utils.downloads import attempt_download_asset
 from ultralytics.utils.torch_utils import model_info
 
@@ -40,7 +40,7 @@ class NAS(Model):
 
     Examples:
         >>> from ultralytics import NAS
-        >>> model = NAS("yolo_nas_s")
+        >>> model = NAS("yolo_nas_s.pt")
         >>> results = model.predict("ultralytics/assets/bus.jpg")
 
     Notes:
@@ -60,13 +60,13 @@ class NAS(Model):
             weights (str): Path to the model weights file or model name.
             task (str, optional): Task type for the model.
         """
-        import super_gradients
 
         suffix = Path(weights).suffix
         if suffix == ".pt":
             self.model = torch.load(attempt_download_asset(weights))
         elif suffix == "":
-            self.model = super_gradients.training.models.get(weights, pretrained_weights="coco")
+            LOGGER.warning("Only PyTorch (.pt) weights are supported for inference and validation with YOLO-NAS, i.e model=NAS('yolo_nas_s.pt')")
+            return
 
         # Override the forward method to ignore additional arguments
         def new_forward(x, *args, **kwargs):
